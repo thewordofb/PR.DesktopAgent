@@ -1,0 +1,749 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "description": "This is a simple document scanner rest API.  The purpose is to abstract the complex WIA (Windows Image Acquisition) API behind a simple set of restful HTTP calls to any web client.  Hosted in a desktop agent, this API could provide access to a web application to access limited desktop services, like scanning.",
+        "version": "1.0.0",
+        "title": "Document Scanner API",
+        "termsOfService": "http://www.pineriversoftware.com/terms/",
+        "contact": {
+            "email": "api@pineriversoftware.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        }
+    },
+    "servers":
+    [
+      "url": "https://www.pineriversoftware.com/scan-api",
+      "url": "http://www.pineriversoftware.com/scan-api"
+    ],
+    "tags": [
+        {
+            "name": "Document",
+            "description": "Get Scanned Documents"
+        },
+        {
+            "name": "Scanner",
+            "description": "Enumerate Scanners, Submit Jobs and Query Status"
+        },
+        {
+            "name": "Health",
+            "description": "Health of the Service"
+        }
+    ],
+    "paths": {
+        "/documents/{DocumentId}":{
+            "get":{
+                "tags":["Document"],
+                "summary":"Get Scanned Documents",
+                "description":"Provides an endpoint to access the scanned image file.",
+                "operationId":"getDocuments",
+                "parameters":[
+                    {
+                        "name":"DocumentId",
+                        "in":"path",
+                        "description":"Unique documentId generated from the Scan Job",
+                        "required":true,
+                        "schema":{
+                          "type":"string"
+                        }
+                    }
+                ],
+                "responses":{
+                    "200": {
+                        "description": "Document Available",
+                        "content":
+                        {
+                            "image/png":
+                            {
+                                "schema":{
+                                    "$ref": "#/components/schemas/Document"
+                                }
+                            },
+                            "image/bmp":
+                            {
+                                "schema":{
+                                    "$ref": "#/components/schemas/Document"
+                                }
+                            },
+                            "image/gif":
+                            {
+                                "schema":{
+                                    "$ref": "#/components/schemas/Document"
+                                }
+                            },
+                            "image/jpeg":
+                            {
+                                "schema":{
+                                    "$ref": "#/components/schemas/Document"
+                                }
+                            },
+                            "image/tiff":
+                            {
+                                "schema":{
+                                    "$ref": "#/components/schemas/Document"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid DocumentId"
+                    },
+                    "404": {
+                        "description": "Document Not Found"
+                    },
+                    "500":{
+                        "description":"Internal Server Error",
+                        "content":
+                        {
+                          "application/json":
+                          {
+                            "schema":{
+                                "$ref":"#/components/schemas/ProblemDetails"
+                            }
+                          }
+                        }
+                    }
+                }
+            }
+        },
+        "/health":{
+            "get":{
+                "tags":["Health"],
+                "summary":"Service Health",
+                "description":"Get the health of the Scan-API service",
+                "operationId":"getHealth",
+                "responses":{
+                    "200": {
+                        "description": "Scan API is Alive"
+                    },
+                    "500":{
+                        "description":"Internal Server Error",
+                        "content":
+                        {
+                          "application/json":
+                          {
+                            "schema":{
+                                "$ref":"#/components/schemas/ProblemDetails"
+                            }
+                          }
+                        }
+                    }
+                }
+            }
+        },
+        "/scanners":{
+            "get":{
+                "tags":["Scanner"],
+                "summary":"Get All Scanners",
+                "description":"Enumerate all installed scanners and return a collection of WIA compliant devices",
+                "operationId":"getAllJobs",
+                "responses":{
+                    "200": {
+                        "description": "All Scanners",
+                        "content":
+                        {
+                          "application/json":
+                          {
+                            "schema":{
+                                "$ref":"#/components/schemas/Devices"
+                            }
+                          }
+                        }
+                    },
+                    "404": {
+                        "description": "No Scanners Found"
+                    },
+                    "500":{
+                        "description":"Internal Server Error",
+                        "content":
+                        {
+                          "application/json":
+                          {
+                            "schema":{
+                                "$ref":"#/components/schemas/ProblemDetails"
+                            }
+                          }
+                        }
+                    }
+                }
+            }
+        },
+        "/scanners/{DeviceId}":{
+            "get":{
+                "tags":["Scanner"],
+                "summary":"Get Scanner by DeviceId",
+                "description":"Get Scanner by Unique WIA DeviceId",
+                "operationId":"getScannerById",
+                "parameters":[
+                    {
+                        "name":"DeviceId",
+                        "in":"path",
+                        "description":"Unique DeviceId",
+                        "required":true,
+                        "schema":
+                        {
+                          "type":"string"
+                        }
+                    }
+                ],
+                "responses":{
+                    "200": {
+                        "description": "Scanner Found",
+                        "content":
+                        {
+                          "application/json":
+                          {
+                            "schema":{
+                                "$ref":"#/components/schemas/Device"
+                            }
+                          }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid DeviceId"
+                    },
+                    "404": {
+                        "description": "Scanner Not Found"
+                    },
+                    "500":{
+                        "description":"Internal Server Error",
+                        "content":
+                        {
+                          "application/json":
+                          {
+                            "schema":{
+                                "$ref":"#/components/schemas/ProblemDetails"
+                            }
+                          }
+                        }
+                    }
+                }
+            }
+        },
+        "/scanners/{DeviceId}/jobs":{
+            "get":{
+                "tags":["Scanner"],
+                "summary":"Get Jobs for Scanner",
+                "description":"Get all scan jobs for a specified scanner",
+                "operationId":"getAllScanJobs",
+                "parameters":[
+                    {
+                        "name":"DeviceId",
+                        "in":"path",
+                        "description":"Unique Scanner DeviceId",
+                        "required":true,
+                        "schema":
+                        {
+                          "type":"string"
+                        }
+                    }
+                ],
+                "responses":{
+                    "200": {
+                        "description": "Scan Job Found",
+                        "content":
+                        {
+                          "application/json":
+                          {
+                            "schema":{
+                                "$ref":"#/components/schemas/ScanJobStatus"
+                            }
+                          }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid DeviceId"
+                    },
+                    "404": {
+                        "description": "Scan Job Not Found"
+                    },
+                    "500":{
+                        "description":"Internal Server Error",
+                        "content":
+                        {
+                          "application/json":
+                          {
+                            "schema":{
+                                "$ref":"#/components/schemas/ProblemDetails"
+                            }
+                          }
+                        }
+                    }
+                }
+            },
+            "post":{
+                "tags":["Scanner"],
+                "summary":"Create New Scan Job",
+                "description":"Create a new scan job for a specified scanner.  This will start the scan process with the ScanJobRequest sent in the body of the Post.  This request will return immediately (even though the scan job is not complete).  Because a scanning operation requires user interaction with the scanner and takes time, a status endpoint is provided so you can check the status of the job.  When the job is done, the status endpoint will provide a list of document resources that have been created.",
+                "operationId":"createScanJob",
+                "parameters":[
+                    {
+                        "name":"DeviceId",
+                        "in":"path",
+                        "description":"Unique Scanner DeviceId",
+                        "required":true,
+                        "schema":
+                        {
+                          "type":"string"
+                        }
+                    }
+                ],
+                "requestBody":
+                {
+                  "description":"todo",
+                  "required":true,
+                  "content":
+                  {
+                    "application/json":
+                    {
+                      "schema":{
+                        "$ref":"#/components/schemas/ScanJobRequest"}
+                    }
+                  }
+                },
+                "responses":{
+                    "202": {
+                        "description": "Scan Job Created",
+                        "content":
+                        {
+                          "application/json":
+                          {
+                            "schema":{
+                                "$ref":"#/components/schemas/ScanJob"
+                            }
+                          }
+                        }
+                    },
+                    "400": {
+                        "description":"Invalid DeviceId or ScanJobRequest"
+                    },
+                    "409": {
+                        "description": "Scan Job Already In Progress"
+                    },
+                    "500":{
+                        "description":"Internal Server Error",
+                        "content":
+                        {
+                          "application/json":
+                          {
+                            "schema":{
+                                "$ref":"#/components/schemas/ProblemDetails"
+                            }
+                          }
+                        }
+                    }
+                }
+            }
+        },
+        "/scanners/{DeviceId}/jobs/{ScanJobId}":{
+            "get":{
+                "tags":["Scanner"],
+                "summary":"Get Scan Job",
+                "description":"Get Scan Job by DeviceId and ScanJobId",
+                "operationId":"getJobById",
+                "parameters":[
+                    {
+                        "name":"DeviceId",
+                        "in":"path",
+                        "description":"Unique Scanner DeviceId",
+                        "required":true,
+                        "schema":
+                        {
+                          "type":"string"
+                        }
+                    },
+                    {
+                        "name":"ScanJobId",
+                        "in":"path",
+                        "description":"Unique Scan Job ScanJobId",
+                        "required":true,
+                        "schema":
+                        {
+                          "type":"string"
+                        }
+                    }
+                ],
+                "responses":{
+                    "200": {
+                        "description": "ScanJob Found",
+                        "content":
+                        {
+                          "application/json":
+                          {
+                            "schema":{
+                                "$ref":"#/components/schemas/ScanJob"
+                            }
+                          }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid DeviceId or ScanJobId"
+                    },
+                    "404": {
+                        "description": "ScanJob Not Found"
+                    },
+                    "500":{
+                        "description":"Internal Server Error",
+                        "content":
+                        {
+                          "application/json":
+                          {
+                            "schema":{
+                                "$ref":"#/components/schemas/ProblemDetails"
+                            }
+                          }
+                        }
+                    }
+                }
+            },
+            "delete":{
+                "tags":["Scanner"],
+                "summary":"Cancel Scan Job",
+                "description":"Cancel a pending scan job if possible",
+                "operationId":"getJobStatusById",
+                "parameters":[
+                    {
+                        "name":"DeviceId",
+                        "in":"path",
+                        "description":"Unique Scanner DeviceId",
+                        "required":true,
+                        "schema":
+                        {
+                          "type":"string"
+                        }
+                    },
+                    {
+                        "name":"ScanJobId",
+                        "in":"path",
+                        "description":"Unique Scan Job ScanJobId",
+                        "required":true,
+                        "schema":
+                        {
+                          "type":"string"
+                        }
+                    }
+                ],
+                "responses":{
+                    "200": {
+                        "description": "Scan Job Cancelled",
+                        "content":
+                        {
+                          "application/json":
+                          {
+                            "schema":{
+                                "$ref":"#/components/schemas/ScanJobStatus"
+                            }
+                          }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid DeviceId or ScanJobId"
+                    },
+                    "404": {
+                        "description": "Scan Job Not Found"
+                    },
+                    "500":{
+                        "description":"Internal Server Error",
+                        "content":
+                        {
+                          "application/json":
+                          {
+                            "schema":{
+                                "$ref":"#/components/schemas/ProblemDetails"
+                            }
+                          }
+                        }
+                    }
+                }
+            }
+        },
+        "/scanners/{DeviceId}/jobs/{ScanJobId}/status":{
+            "get":{
+                "tags":["Scanner"],
+                "summary":"Get Scan Job Status",
+                "description":"Get the status of a pending scan job",
+                "operationId":"getJobStatusByJobIdAndDeviceId",
+                "parameters":[
+                    {
+                        "name":"DeviceId",
+                        "in":"path",
+                        "description":"Unique Scanner DeviceId",
+                        "required":true,
+                        "schema":
+                        {
+                          "type":"string"
+                        }
+                    },
+                    {
+                        "name":"ScanJobId",
+                        "in":"path",
+                        "description":"Unique Scan Job ScanJobId",
+                        "required":true,
+                        "schema":
+                        {
+                          "type":"string"
+                        }
+                    }
+                ],
+                "responses":{
+                    "200": {
+                        "description": "Status Found",
+                        "content":
+                        {
+                          "application/json":
+                          {
+                            "schema":{
+                                "$ref":"#/components/schemas/ScanJobStatus"
+                            }
+                          }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid DeviceId or ScanJobId"
+                    },
+                    "404": {
+                        "description": "Scan Job Not Found"
+                    },
+                    "500":{
+                        "description":"Internal Server Error",
+                        "content":
+                        {
+                          "application/json":
+                          {
+                            "schema":{
+                                "$ref":"#/components/schemas/ProblemDetails"
+                            }
+                          }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+      "schemas":
+      {
+        "Devices":{
+            "type":"array",
+            "description":"Collection of Devices",
+            "items":{
+                "$ref":"#/components/schemas/Device"
+            }
+        },
+        "Device": {
+            "type": "object",
+            "description":"Device",
+            "properties": {
+                "DeviceId": {
+                    "type": "string",
+                    "description":"Unique DeviceId"
+                },
+                "FullDeviceId": {
+                    "type": "string",
+                    "description":"Full WIA DeviceId"
+                },
+                "Type": {
+                    "type": "string",
+                    "description":"WIA Device Type",
+                    "enum": [
+                        "Camera",
+                        "Scanner",
+                        "Video",
+                        "Unknown"
+                    ]
+                },
+                "Properties": {
+                    "type": "array",
+                    "description":"WIA Self-Identifying Device Properties",
+                    "items": {
+                        "$ref": "#/components/schemas/DeviceProperty"
+                    }
+                }
+            }
+        },
+        "DeviceProperty": {
+            "type": "object",
+            "description":"Device Property",
+            "properties": {
+                "IsReadonly": {
+                    "type": "boolean",
+                    "description":"Is Property Read-Only"
+                },
+                "IsVector": {
+                    "type": "boolean",
+                    "description":"Is Property a Vector"
+                },
+                "Name": {
+                    "type": "string",
+                    "description":"Property Name"
+                },
+                "PropertyId": {
+                    "type": "string",
+                    "description":"Property Unique Identifier"
+                },
+                "PropertyType": {
+                    "type": "integer",
+                    "description":"Property DataType (Defined by WIA)"
+                },
+                "Value": {
+                    "type": "object",
+                    "description":"Property Value (dynamic)"
+                },
+                "SubType": {
+                    "type": "string",
+                    "description":"Property SubType"
+                },
+                "SubTypeDefault": {
+                    "type": "object",
+                    "description":"SubType Default Value"
+                },
+                "SubTypeMax": {
+                    "type": "integer",
+                    "description":"SubType Max Range"
+                },
+                "SubTypeMin": {
+                    "type": "integer",
+                    "description":"SubType Min Range"
+                },
+                "SubTypeStep": {
+                    "type": "integer",
+                    "description":"SubType Range Step"
+                },
+                "SubTypeValues": {
+                    "type": "array",
+                    "description":"SubType Values (dynamic)",
+                    "items": {
+                        "type": "object"
+                    }
+                }
+            }
+        },
+        "Document": {
+            "type": "string",
+            "description":"Scanned Document",
+            "format":"binary"
+        },
+        "ScanJob": {
+            "type": "object",
+            "description":"Scan Job",
+            "properties": {
+                "ScanJobId":{
+                    "type":"string",
+                    "description":"Unique ScanJobId"
+                },
+                "Status":{
+                    "type":"string",
+                    "description":"Status of the Scan Job",
+                    "enum":["InProgress", "Completed", "Cancelled","Failed"]
+                },
+                "Request":{
+                    "description":"The ScanJob Request Parameters",
+                    "$ref":"#/components/schemas/ScanJobRequest"
+                }
+            }
+        },
+        "ScanJobRequest": {
+            "type": "object",
+            "description":"Scan Job Request",
+            "properties": {
+                "DeviceId": {
+                    "type": "string",
+                    "description":"Unique DeviceId"
+                },
+                "ResolutionDPI": {
+                    "type": "integer",
+                    "description":"Scan Resolution"
+                },
+                "StartHorizontalPixel": {
+                    "type": "integer",
+                    "description":"Start Location (x-axis)"
+                },
+                "StartVerticalPixel": {
+                    "type": "integer",
+                    "description":"Stat Location (y-axis)"
+                },
+                "WidthPixels": {
+                    "type": "integer",
+                    "description":"Scan Width (x-axis)"
+                },
+                "HeightPixels": {
+                    "type": "integer",
+                    "description":"Scan Height (y-axis)"
+                },
+                "BrightnessPercent": {
+                    "type": "integer",
+                    "description":"Brightness (Percent)"
+                },
+                "ContrastPercent": {
+                    "type": "integer",
+                    "description":"Contrast (Percent)"
+                },
+                "BitDepth": {
+                    "type": "integer",
+                    "description":"Color bit-depth"
+                },
+                "Format": {
+                    "type": "string",
+                    "description":"Image Format",
+                    "enum": [
+                        "BMP",
+                        "PNG",
+                        "GIF",
+                        "JPEG",
+                        "TIFF"
+                    ]
+                }
+            }
+        },
+        "ScanJobStatus": {
+            "type": "object",
+            "description":"Scan Job Status",
+            "properties": {
+                "Status":{
+                    "type":"string",
+                    "description":"Scan Job Status",
+                    "enum":["InProgress", "Completed", "Cancelled","Failed"]
+                },
+                "ScanJobId":{
+                    "type":"string",
+                    "description":"Unique ScanJobId"
+                },
+                "DeviceId":{
+                    "type":"string",
+                    "description":"Unique DeviceId"
+                },
+                "DocumentIds":{
+                    "type":"array",
+                    "description":"Collection of Scanned DocumentIds",
+                    "items":{
+                        "type":"string"
+                    }
+                }
+            }
+        },
+        "ProblemDetails": {
+            "type": "object",
+            "properties": {
+                "Title":{
+                    "type":"string",
+                    "description":"Problem Title"
+                },
+                "Detail":{
+                    "type":"string",
+                    "description":"Problem Description"
+                },
+                "Status":{
+                    "type":"string",
+                    "description":"HTTP Status Code"
+                },
+                "Instance":{
+                    "type":"string",
+                    "description":"URL Request Instance of the Error"
+                }
+            }
+        }
+      }
+    }
+}
