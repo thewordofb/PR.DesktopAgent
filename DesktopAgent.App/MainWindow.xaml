@@ -1,0 +1,21 @@
+﻿<Window x:Class="DesktopAgent.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DesktopAgent.App"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen" Topmost="true" Icon="Resources/small_tree.ico"
+        Title="Pine River Desktop" Height="180" Width="300" ShowInTaskbar="False" WindowState="Minimized">
+    <StackPanel Margin="10">
+        <StackPanel Orientation="Horizontal">
+            <Image Source="Resources/small-tree-logo.png" Height="48" Width="48" Margin="-5" />
+            <TextBlock Text="Pine River" FontSize="28" FontWeight="DemiBold" Foreground="#353535" Margin="0,-3"  FontFamily="Calisto MT" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+        </StackPanel>
+        <Label Margin="0,10,0,0" Content="Installed Services" Foreground="#606060" />
+        <ListBox Margin="5,0,5,10">
+            <ListBoxItem>Scan to Web - Version 1.0</ListBoxItem>
+        </ListBox>
+        <TextBlock Text="Pine River Software - Copyright 2019" FontSize="10" Foreground="#909090" />
+    </StackPanel>
+</Window>
