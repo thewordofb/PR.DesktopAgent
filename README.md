@@ -16,5 +16,3 @@ You can see the API [here](http://thewordofb.github.io/Scan-Api)
 2. Create a scan job
 3. Check scan job status
 4. Download images acquired from scan job
-
-
